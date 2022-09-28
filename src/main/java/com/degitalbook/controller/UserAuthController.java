@@ -32,7 +32,7 @@ import com.degitalbook.payload.MessageResponse;
 import com.degitalbook.payload.SignupJwtRequest;
 import com.degitalbook.utils.JwtUtils;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin
 @RestController
 @RequestMapping("/user/auth")
 public class UserAuthController {
@@ -112,9 +112,9 @@ public class UserAuthController {
 		}
 
 		user.setRoles(roles);
-		userRepository.save(user);
+		DegitalbookUser save = userRepository.save(user);
 
-		return ResponseEntity.ok(new MessageResponse(roles+": User registered successfully!"));
+		return ResponseEntity.ok(new MessageResponse(save.toString()+": User registered successfully!"));
 	}
 
 }

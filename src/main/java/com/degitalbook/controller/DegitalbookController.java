@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,20 +22,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.degitalbook.Repository.DegitalbookPaymentRepository;
 import com.degitalbook.Service.DegitalBookService;
 import com.degitalbook.entity.BuyBookRequest;
 import com.degitalbook.entity.DegitalBookEntity;
+import com.degitalbook.entity.Payment;
+import com.degitalbook.entity.RefundPayment;
+import com.degitalbook.entity.UpdateBookRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@CrossOrigin(origins = "/*", maxAge = 3600)
+@CrossOrigin
 @RestController
 @RequestMapping("/degitalbook")
 public class DegitalbookController {
 
 	@Autowired
 	private DegitalBookService service;
+
 
 	@PreAuthorize("hasRole('ROLE_READER')")
 	@GetMapping("/{id}")
@@ -84,12 +90,37 @@ public class DegitalbookController {
 	}
 
 	@PreAuthorize("hasRole('ROLE_READER')")
-	@GetMapping("/readers/{email}/books/{bookId}")
-	public ResponseEntity readBooks(@PathVariable("email") String email, @PathVariable("bookId") Long bookId) {
+	@GetMapping("/readbook/{email}/{bookId}")
+	public ResponseEntity<Map<String, String>> readBooks(@PathVariable("email") String email, @PathVariable("bookId") Long bookId) {
 		Map<String, String> readerReadBook = service.readerReadBook(email, bookId);
 		ResponseEntity entity = new ResponseEntity(readerReadBook, HttpStatus.OK);
 		return entity;
 	}
+
+	@PreAuthorize("hasRole('ROLE_READER')")
+	@GetMapping("/getPurchaseBookByPaymentId/{email}")
+	public ResponseEntity getPurchaseBookByPaymentId(@PathVariable String email, @RequestParam Long paymentId) {
+		Map<String, String> purchaseBookByPaymentId = service.getPurchaseBookByPaymentId(email, paymentId);
+		ResponseEntity entity = new ResponseEntity(purchaseBookByPaymentId, HttpStatus.OK);
+		return entity;
+	}
+
+	@PreAuthorize("hasRole('ROLE_READER')")
+	@PostMapping("refund/{email}/{bookId}")
+	public ResponseEntity RefundPaymentByBookId(@PathVariable String email, @PathVariable Long bookId,
+			@RequestBody RefundPayment refund) {
+		Map<String, String> refundPaymentByBookId = service.RefundPaymentByBookId(email, bookId, refund);
+		ResponseEntity entity = new ResponseEntity(refundPaymentByBookId, HttpStatus.OK);
+		return entity;
+
+	}
+
+//	@PreAuthorize("hasRole('ROLE_READER')")
+//	@GetMapping("/getallpurchaseBook/")
+//	public List<Payment> viewAllpurchaseBook(@PathVariable Long payId) {
+//		List<Payment> findAll = paymentRepo.findAll();
+//		return findAll;
+//	}
 
 	@PreAuthorize("hasRole('ROLE_READER')")
 	@GetMapping("/getallbooks")
@@ -99,18 +130,19 @@ public class DegitalbookController {
 	}
 
 	@PreAuthorize("hasRole('ROLE_AUTHOR')")
-	@PutMapping("/{id}")
-	public DegitalBookEntity updateBookEntity(@PathVariable long id, @RequestBody DegitalBookEntity entity) {
-		DegitalBookEntity saveDegitalbook = service.updateDegitalbook(id, entity);
-		return saveDegitalbook;
+	@PutMapping("/updatebook/{id}")
+	public ResponseEntity updateBookEntity(@PathVariable long id, @RequestBody UpdateBookRequest entity) {
+		ResponseEntity updateDegitalbook = service.updateDegitalbook(id, entity);
+
+		return updateDegitalbook;
 
 	}
 
 	@PreAuthorize("hasRole('ROLE_AUTHOR')")
-	@DeleteMapping("/{id}")
-	public DegitalBookEntity deletebookByid(@PathVariable long id) {
-		DegitalBookEntity degitalbookById = service.deleteDegitalbookbyId(id);
-		return degitalbookById;
+	@DeleteMapping("/deletebook/{id}")
+	public String deletebookByid(@PathVariable Long id) {
+		String deleteDegitalbookbyId = service.deleteDegitalbookbyId(id);
+		return deleteDegitalbookbyId;
 	}
 
 }

@@ -14,5 +14,11 @@ public interface DegitalbookPaymentRepository extends JpaRepository<Payment, Lon
 	List<Payment> findAllByreaderId(Long readerId);
 	Optional<Payment>  findById(Long paymentId);
 	
+	Optional<Payment> findByBookId(Long bookId);
+	
+	boolean existsByBookId(Long bookId);
+	
+	
+    
 
 }

@@ -7,6 +7,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import lombok.Data;
 
@@ -20,7 +22,8 @@ public class Payment {
 	private Long readerId;
 	private Long bookId;
 	private double price;
-	private Date paymentdate;
+	@Temporal(TemporalType.DATE)
+	private Date paymentdate=new Date(System.currentTimeMillis());
 
 	public Long getId() {
 		return id;
