@@ -3,6 +3,7 @@ package com.degitalbook.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -41,7 +42,6 @@ public class DegitalbookController {
 	@Autowired
 	private DegitalBookService service;
 
-
 	@PreAuthorize("hasRole('ROLE_READER')")
 	@GetMapping("/{id}")
 	public DegitalBookEntity getbookByid(@PathVariable long id) {
@@ -56,12 +56,11 @@ public class DegitalbookController {
 		return saveDegitalbook;
 	}
 
-	@PreAuthorize("hasRole('ROLE_READER')")
 	@GetMapping("/searchbook")
-	public ResponseEntity<Object> SearchBooks(@RequestParam String catagory, @RequestParam String author,
+	public List<DegitalBookEntity> SearchBooks(@RequestParam String category, @RequestParam String author,
 			@RequestParam double price) {
 
-		List<DegitalBookEntity> searchDegitalbook = service.searchDegitalbook(catagory, author, price);
+		List<DegitalBookEntity> searchDegitalbook = service.searchDegitalbook(category, author, price);
 		Map<String, String> map = new HashMap<>();
 		searchDegitalbook.forEach(degitalbook -> {
 			map.put("Author", degitalbook.getAuthor());
@@ -72,7 +71,8 @@ public class DegitalbookController {
 			map.put("Category", degitalbook.getCategory());
 		});
 
-		return new ResponseEntity<Object>(map, HttpStatus.OK);
+	//	return new ResponseEntity<Map<String, String>>(map, HttpStatus.OK);
+		return searchDegitalbook;
 	}
 
 	@PreAuthorize("hasRole('ROLE_READER')")
@@ -84,14 +84,15 @@ public class DegitalbookController {
 
 	@PreAuthorize("hasRole('ROLE_READER')")
 	@GetMapping("/purchasebooks/{email}")
-	public ResponseEntity findAllPurchaseBook(@PathVariable String email) {
+	public ResponseEntity<Map<String, Set<Long>>> findAllPurchaseBook(@PathVariable String email) {
 		return service.findAllPurchaseBook(email);
 
 	}
 
 	@PreAuthorize("hasRole('ROLE_READER')")
 	@GetMapping("/readbook/{email}/{bookId}")
-	public ResponseEntity<Map<String, String>> readBooks(@PathVariable("email") String email, @PathVariable("bookId") Long bookId) {
+	public ResponseEntity<Map<String, String>> readBooks(@PathVariable("email") String email,
+			@PathVariable("bookId") Long bookId) {
 		Map<String, String> readerReadBook = service.readerReadBook(email, bookId);
 		ResponseEntity entity = new ResponseEntity(readerReadBook, HttpStatus.OK);
 		return entity;
@@ -131,8 +132,8 @@ public class DegitalbookController {
 
 	@PreAuthorize("hasRole('ROLE_AUTHOR')")
 	@PutMapping("/updatebook/{id}")
-	public ResponseEntity updateBookEntity(@PathVariable long id, @RequestBody UpdateBookRequest entity) {
-		ResponseEntity updateDegitalbook = service.updateDegitalbook(id, entity);
+	public ResponseEntity<DegitalBookEntity> updateBookEntity(@PathVariable long id, @RequestBody DegitalBookEntity entity) {
+		ResponseEntity<DegitalBookEntity> updateDegitalbook = service.updateDegitalbook(id, entity);
 
 		return updateDegitalbook;
 

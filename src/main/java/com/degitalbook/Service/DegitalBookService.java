@@ -49,21 +49,22 @@ public class DegitalBookService {
 		return save;
 	}
 
-	public ResponseEntity updateDegitalbook(long id, UpdateBookRequest bookEntity) {
+	public ResponseEntity<DegitalBookEntity> updateDegitalbook(long id, DegitalBookEntity bookEntity) {
 
-		DegitalBookEntity getbookbyID = bookRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("degital book not found" + id));
+		 Optional<DegitalBookEntity> bookid = bookRepository.findById(id);
+				DegitalBookEntity getbookbyID = bookid.get();
 
-		getbookbyID.setCategory(bookEntity.getCategory());
-		getbookbyID.setTitle(bookEntity.getTitle());
-		getbookbyID.setContent(bookEntity.getContent());
-		getbookbyID.setImage(bookEntity.getImage());
-		getbookbyID.setPrice(bookEntity.getPrice());
-		getbookbyID.setPublisher(bookEntity.getPublisher());
-		getbookbyID.setAuthor(bookEntity.getAuthor());
-		getbookbyID.setId(bookEntity.getId());
-		DegitalBookEntity save = bookRepository.save(getbookbyID);
-		ResponseEntity entity = new ResponseEntity(save, HttpStatus.OK);
+		 bookEntity.setId(getbookbyID.getId());
+		 bookEntity.setAuthor(getbookbyID.getAuthor());
+		 bookEntity.setCategory(getbookbyID.getCategory());
+		 bookEntity.setContent(getbookbyID.getContent());
+		 bookEntity.setImage(getbookbyID.getImage());
+		 bookEntity.setPrice(getbookbyID.getPrice());
+		 bookEntity.setPublisher(getbookbyID.getPublisher());
+		 bookEntity.setTitle(getbookbyID.getTitle());
+		 bookEntity.setPublishdate(getbookbyID.getPublishdate());
+		DegitalBookEntity save = bookRepository.save(bookEntity);
+		ResponseEntity<DegitalBookEntity> entity = new ResponseEntity(save, HttpStatus.OK);
 
 		return entity;
 	}
@@ -88,7 +89,7 @@ public class DegitalBookService {
 
 	public List<DegitalBookEntity> searchDegitalbook(String category, String author, double price) {
 		List<DegitalBookEntity> findByCategoryAndAuthorAndPrice = bookRepository
-				.findByCategoryAndAuthorAndPrice(category, author, price);
+				.findAllByCategoryAndAuthorAndPrice(category, author, price);
 
 		return findByCategoryAndAuthorAndPrice;
 
@@ -110,7 +111,8 @@ public class DegitalBookService {
 	}
 
 	public Payment savePayment(Payment payment) {
-		return paymentRepository.save(payment);
+		Payment save = paymentRepository.save(payment);
+		return save;
 
 	}
 
@@ -150,13 +152,15 @@ public class DegitalBookService {
 			Payment payment = new Payment();
 
 			// DegitalbookUser degitalbookUser = userbyName.get();
-
+            payment.setId(degitalbook.getId());
 			payment.setBookId(degitalbook.getId());
 			payment.setPaymentdate(degitalbook.getPublishdate());
 			payment.setReaderId(degitalbookUser.getId());
 			payment.setPrice(degitalbook.getPrice());
 
-			Payment savePayment = savePayment(payment);
+		//	Payment savePayment = savePayment(payment);
+			Payment savePayment = paymentRepository.save(payment);
+			
 			map.put("PaymentId", savePayment.getId());
 			map.put("BookId", savePayment.getBookId());
 
@@ -165,7 +169,7 @@ public class DegitalBookService {
 		return request;
 	}
 
-	public ResponseEntity findAllPurchaseBook(String email) {
+	public ResponseEntity<Map<String, Set<Long>>> findAllPurchaseBook(String email) {
 		DegitalbookUser degitalbookUser = userRepository.findByEmail(email)
 				.orElseThrow(() -> new RuntimeException("Email not Found"));
 		// DegitalbookUser degitalbookUser = findByEmail.get();

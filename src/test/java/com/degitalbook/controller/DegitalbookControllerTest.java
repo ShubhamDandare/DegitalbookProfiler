@@ -7,8 +7,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,7 @@ public class DegitalbookControllerTest {
 	public DegitalbookController bookController;
 
 	@Test
-	public void saveBookTest() {
+	public void createBookEntityTest() {
 
 		DegitalBookEntity entity = new DegitalBookEntity();
 		entity.setId(1);
@@ -64,15 +66,22 @@ public class DegitalbookControllerTest {
 		entity.add(book);
 
 		when(bookService.searchDegitalbook("Motivation", "Rexx", 1234.43)).thenReturn(entity);
-		ResponseEntity<Object> searchBooks = bookController.SearchBooks("Motivation", "Rexx", 1234.43);
-		HashMap<String, String> map = (HashMap<String, String>) searchBooks.getBody();
-		String category = map.get("Category");
-		assertThat(category.equals("Motivation"));
+		// ResponseEntity<List<DegitalBookEntity>> searchBooks =
+		// (ResponseEntity<List<DegitalBookEntity>>)
+		// bookController.SearchBooks("Motivation", "Rexx", 1234.43);
+		List<DegitalBookEntity> searchBooks = bookController.SearchBooks("Motivation", "Rexx", 1234.43);
+		DegitalBookEntity degitalBookEntity = searchBooks.get(0);
+		String category2 = degitalBookEntity.getCategory();
+		assertThat(category2.equals("Motivation"));
+		
+//		HashMap<String, String> map = (HashMap<String, String>) searchBooks.getBody();
+//		String category = map.get("Category");
+//		assertThat(category.equals("Motivation"));
 
 	}
 
 	@Test
-	public void buyBookTest() {
+	public void buyDegitalBookTest() {
 
 		BuyBookRequest request = new BuyBookRequest();
 		request.setBookid(1L);
@@ -94,7 +103,7 @@ public class DegitalbookControllerTest {
 	}
 
 	@Test
-	public void readBookTest() {
+	public void readBooksTest() {
 
 		DegitalBookEntity entity = new DegitalBookEntity();
 		entity.setCategory("eee");
@@ -192,6 +201,28 @@ public class DegitalbookControllerTest {
 				.RefundPaymentByBookId("123@gmail.com", 1L, refund);
 		Map<String, String> str = refundPaymentByBookId.getBody();
 		assertThat(str.get("bookid").equals("1L"));
+	}
+
+	@Test
+	public void findAllPurchaseBook() {
+		DegitalbookUser user = new DegitalbookUser();
+		user.setEmail("shubham@gmail.com");
+
+		DegitalBookEntity entity = new DegitalBookEntity();
+		entity.setId(1L);
+
+		Set<Long> uniquebooklist = new HashSet<>();
+		uniquebooklist.add(entity.getId());
+		Map<String, Set<Long>> map = new HashMap<String, Set<Long>>();
+		map.put("BookID", uniquebooklist);
+
+		when(bookService.findAllPurchaseBook("shubham@gmail.com"))
+				.thenReturn(new ResponseEntity<Map<String, Set<Long>>>(map, HttpStatus.OK));
+		ResponseEntity<Map<String, Set<Long>>> findAllPurchaseBook = bookController
+				.findAllPurchaseBook("shubham@gmail.com");
+		Map<String, Set<Long>> body = findAllPurchaseBook.getBody();
+		assertThat(body.get("BookID").equals(1));
+
 	}
 
 }

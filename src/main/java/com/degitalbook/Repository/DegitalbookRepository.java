@@ -15,5 +15,5 @@ public interface DegitalbookRepository extends JpaRepository<DegitalBookEntity, 
 
 	Optional<DegitalBookEntity> findById(Long bookId);
 
-	List<DegitalBookEntity> findByCategoryAndAuthorAndPrice(String category, String author, double price);
+	List<DegitalBookEntity> findAllByCategoryAndAuthorAndPrice(String category, String author, double price);
 }
